@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>تقنية ليبية — مساعدك الذكي 🇱🇾</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Firebase: تسجيل الدخول بحساب Google -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDzUcXscbjEdD4U-Pe9XTMHmceArQSxmOA",
+    authDomain: "hmai-f6225.firebaseapp.com",
+    projectId: "hmai-f6225",
+    storageBucket: "hmai-f6225.firebasestorage.app",
+    messagingSenderId: "232841600909",
+    appId: "1:232841600909:web:568444dbfff6aa550be7c4",
+    measurementId: "G-YJ19F15WWL"
+  };
+
+  const fbApp = initializeApp(firebaseConfig);
+  const auth = getAuth(fbApp);
+  const googleProvider = new GoogleAuthProvider();
+
+  window.firebaseGoogleSignIn = async function () {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    return {
+      name: user.displayName || 'مستخدم Google',
+      email: user.email,
+      uid: user.uid,
+      photo: user.photoURL
+    };
+  };
+</script>
+
+<style>
+  :root {
+    --bg-void: #0b0e14;
+    --bg-panel: #12161f;
+    --bg-elevated: #1a1f2c;
+    --bg-hover: #212736;
+    --sand: #d4a054;
+    --sand-dim: #8a6a3d;
+    --oasis: #3a9188;
+    --text-primary: #eef0f4;
+    --text-secondary: #8b93a7;
+    --text-faint: #565f75;
+    --border: #232939;
+    --danger: #d16464;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    font-family: 'Tajawal', sans-serif;
+    background: var(--bg-void);
+    color: var(--text-primary);
+    overflow: hidden;
+  }
+
+  body {
+    display: flex;
+    height: 100vh;
+  }
+
+  /* ===== Sidebar ===== */
+  #sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--bg-panel);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    transition: margin-right 0.25s ease;
+  }
+
+  #sidebar.collapsed {
+    margin-right: -280px;
+  }
+
+  .sidebar-header {
+    padding: 20px 18px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--sand), var(--sand-dim));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 18px;
+    color: var(--bg-void);
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: 0.3px;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text-faint);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+
+  #newChatBtn {
+    margin: 14px;
+    padding: 11px 14px;
+    background: transparent;
+    border: 1px solid var(--sand-dim);
+    color: var(--sand);
+    border-radius: 10px;
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  #newChatBtn:hover {
+    background: rgba(212, 160, 84, 0.08);
+    border-color: var(--sand);
+  }
+
+  #convList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .conv-item {
+    padding: 10px 12px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    position: relative;
+  }
+  .conv-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+  .conv-item.active {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    box-shadow: inset 3px 0 0 var(--sand);
+  }
+  .conv-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .conv-delete {
+    opacity: 0;
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    cursor: pointer;
+    font-size: 15px;
+    padding: 2px 5px;
+    border-radius: 5px;
+    flex-shrink: 0;
+  }
+  .conv-item:hover .conv-delete { opacity: 1; }
+  .conv-delete:hover { color: var(--danger); background: rgba(209,100,100,0.1); }
+
+  .sidebar-footer {
+    padding: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-faint);
+    font-family: 'IBM Plex Mono', monospace;
+    text-align: center;
+  }
+
+  /* ===== Main ===== */
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    position: relative;
+  }
+
+  #topbar {
+    height: 58px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #toggleSidebar {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  #toggleSidebar:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+  #topbarTitle {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text-secondary);
+  }
+
+  #userBadge {
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #userNameDisplay {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--sand);
+  }
+
+  #logoutBtn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  #logoutBtn:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  #chatScroll {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+  }
+
+  #chatInner {
+    width: 100%;
+    max-width: 760px;
+    padding: 30px 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  /* Empty state */
+  #emptyState {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 18px;
+    padding: 40px 20px;
+  }
+
+  #emptyState .glyph {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--sand), var(--oasis));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: 900;
+    color: var(--bg-void);
+  }
+  #emptyState h1 { font-size: 24px; font-weight: 900; }
+  #emptyState p { color: var(--text-secondary); font-size: 14.5px; max-width: 340px; line-height: 1.7; }
+
+  .suggestions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+    width: 100%;
+    max-width: 520px;
+    margin-top: 10px;
+  }
+
+  .suggestion-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-align: right;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  }
+  .suggestion-card:hover {
+    border-color: var(--sand-dim);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+  }
+
+  /* Messages */
+  .row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .row.user {
+    flex-direction: row-reverse;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .avatar.bot {
+    background: linear-gradient(135deg, var(--sand), var(--sand-dim));
+    color: var(--bg-void);
+  }
+
+  .avatar.user {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+
+  .bubble {
+    max-width: 82%;
+    padding: 13px 18px;
+    border-radius: 16px;
+    font-size: 15px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .row.bot .bubble {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-top-right-radius: 4px;
+  }
+
+  .row.user .bubble {
+    background: var(--bg-elevated);
+    border: 1px solid #2d354a;
+    color: var(--text-primary);
+    border-top-left-radius: 4px;
+  }
+
+  /* Typing dots */
+  .typing-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+  }
+  .typing-dots span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--sand);
+    animation: pulse 1.2s infinite ease-in-out;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse {
+    0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  /* Input area */
+  #inputWrap {
+    padding: 16px 20px 24px;
+    display: flex;
+    justify-content: center;
+    background: linear-gradient(180deg, transparent, var(--bg-void) 40%);
+  }
+
+  #inputBox {
+    width: 100%;
+    max-width: 760px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 8px 12px 8px 16px;
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: border-color 0.2s;
+  }
+
+  #inputBox:focus-within {
+    border-color: var(--sand-dim);
+  }
+
+  #userInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    resize: none;
+    max-height: 160px;
+    min-height: 24px;
+    padding: 6px 0;
+  }
+
+  #sendBtn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--sand);
+    border: none;
+    color: var(--bg-void);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  #sendBtn:hover { opacity: 0.9; transform: scale(1.04); }
+  #sendBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .hint {
+    font-size: 11px;
+    color: var(--text-faint);
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  /* Overlay for mobile */
+  #overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 90;
+  }
+
+  /* Canva Style Auth Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(11, 14, 20, 0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .canva-card {
+    background: #ffffff;
+    color: #0e131f;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 440px;
+    padding: 36px 28px 28px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .canva-card h2 {
+    font-size: 24px;
+    font-weight: 900;
+    color: #0e131f;
+    line-height: 1.35;
+    margin-bottom: 8px;
+  }
+  .canva-card p.sub {
+    font-size: 13.5px;
+    color: #5d677a;
+    line-height: 1.6;
+    margin-bottom: 22px;
+    max-width: 350px;
+  }
+  .social-btn {
+    width: 100%;
+    padding: 13px 18px;
+    border-radius: 50px;
+    border: 1px solid #dcdfe6;
+    background: #ffffff;
+    color: #0e131f;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  }
+  .social-btn:hover {
+    background: #f7f9fc;
+    border-color: #c0c4cc;
+    transform: translateY(-1px);
+  }
+  .auth-tabs {
+    display: flex;
+    border-bottom: 1px solid #e4e7ed;
+    margin-bottom: 14px;
+  }
+  .auth-tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    color: #7f8b9d;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .auth-tab.active {
+    color: #d4a054;
+    border-bottom-color: #d4a054;
+  }
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    text-align: right;
+  }
+  .auth-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .auth-input-group label {
+    font-size: 13px;
+    color: #475569;
+    font-weight: 700;
+  }
+  .auth-input {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #0f172a;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .auth-input:focus {
+    border-color: #d4a054;
+    background: #ffffff;
+  }
+  .auth-btn {
+    background: linear-gradient(135deg, #d4a054, #8a6a3d);
+    border: none;
+    border-radius: 50px;
+    color: #ffffff;
+    font-weight: 900;
+    font-size: 15px;
+    padding: 13px;
+    cursor: pointer;
+    margin-top: 6px;
+    font-family: inherit;
+    transition: opacity 0.2s;
+  }
+  .auth-btn:hover { opacity: 0.9; }
+  .auth-error {
+    color: #d16464;
+    font-size: 13px;
+    text-align: center;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 8px 12px;
+    border-radius: 8px;
+    display: none;
+    margin-bottom: 10px;
+  }
+  .footer-terms {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #7f8b9d;
+    line-height: 1.6;
+  }
+  .footer-terms a {
+    color: #2563eb;
+    text-decoration: underline;
+    font-weight: 700;
+  }
+
+  @media (max-width: 720px) {
+    #sidebar {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      z-index: 100;
+    }
+    #overlay.show { display: block; }
+  }
+</style>
+</head>
+<body>
+
+<div id="overlay"></div>
+
+<!-- Modal تسجيل الدخول بتصميم Canva 🇱🇾 -->
+<div id="authModal" class="modal-overlay active">
+  <div class="canva-card">
+    <h2>تسجيل الدخول أو إنشاء حساب في ثوانٍ</h2>
+    <p class="sub">استخدم بريدك الإلكتروني أو أي خدمة أخرى لمتابعة استخدام تقنية ليبية (مجاناً).</p>
+
+    <!-- أزرار الدخول السريع -->
+    <div class="social-group" style="width: 100%;">
+      <button type="button" id="btnGoogle" class="social-btn">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
+        <span>المتابعة من خلال Google</span>
+      </button>
+
+      <button type="button" id="btnFacebook" class="social-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        <span>المتابعة من خلال فيسبوك</span>
+      </button>
+
+      <button type="button" id="btnEmailToggle" class="social-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2c3e50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span>المتابعة باستخدام البريد الإلكتروني</span>
+      </button>
+    </div>
+
+    <!-- نموذج الإدخال عند اختيار البريد -->
+    <div id="emailFormWrap" style="width: 100%; display: none; margin-top: 10px;">
+      <div class="auth-tabs">
+        <div id="tabLogin" class="auth-tab active">تسجيل الدخول</div>
+        <div id="tabRegister" class="auth-tab">إنشاء حساب جديد</div>
+      </div>
+
+      <div id="authError" class="auth-error"></div>
+
+      <!-- نموذج تسجيل الدخول -->
+      <form id="loginForm" class="auth-form">
+        <div class="auth-input-group">
+          <label>اسم المستخدم أو البريد الإلكتروني</label>
+          <input type="text" id="loginUsername" class="auth-input" placeholder="ادخل اسم المستخدم" required>
+        </div>
+        <div class="auth-input-group">
+          <label>كلمة المرور</label>
+          <input type="password" id="loginPassword" class="auth-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="auth-btn">تسجيل الدخول 🚀</button>
+      </form>
+
+      <!-- نموذج إنشاء حساب -->
+      <form id="registerForm" class="auth-form" style="display: none;">
+        <div class="auth-input-group">
+          <label>الاسم الكامل</label>
+          <input type="text" id="regName" class="auth-input" placeholder="مثال: علي الطرابلسي" required>
+        </div>
+        <div class="auth-input-group">
+          <label>اسم المستخدم (ثلاثة أحرف بالإنجليزية)</label>
+          <input type="text" id="regUsername" class="auth-input" placeholder="مثال: ali2026" required>
+        </div>
+        <div class="auth-input-group">
+          <label>كلمة المرور</label>
+          <input type="password" id="regPassword" class="auth-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="auth-btn">إنشاء الحساب 🇱🇾</button>
+      </form>
+    </div>
+
+    <div class="footer-terms">
+      بالمتابعة، أنت توافق على <a href="#">شروط الاستخدام</a> المعمول بها لدينا. يُرجى الاطلاع على <a href="#">سياسة الخصوصية</a> المعمول بها لدينا.
+    </div>
+  </div>
+</div>
+
+<aside id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-mark">🇱🇾</div>
+    <div>
+      <div class="logo-text">تقنية ليبية</div>
+      <div class="logo-sub">v2.0 AUTH & AI</div>
+    </div>
+  </div>
+  <button id="newChatBtn"><span>＋</span> محادثة جديدة</button>
+  <div id="convList"></div>
+  <div class="sidebar-footer">مشروع تقنية ليبية — 2026</div>
+</aside>
+
+<main id="main">
+  <div id="topbar">
+    <button id="toggleSidebar" title="القائمة">☰</button>
+    <span id="topbarTitle">محادثة جديدة</span>
+
+    <div id="userBadge">
+      <span id="userNameDisplay"></span>
+      <button id="authBtn" style="background: var(--sand); border: none; color: var(--bg-void); padding: 7px 14px; border-radius: 9px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit;">دخول / تسجيل 🔑</button>
+    </div>
+  </div>
+
+  <div id="chatScroll">
+    <div id="chatInner">
+      <div id="emptyState">
+        <div class="glyph">🇱🇾</div>
+        <h1>أهلاً بيك يا غالي!</h1>
+        <p>أني صاحبك الليبي، تفضل هدرز معايا في أي موضوع أو اسألني على أي حاجة تبيها!</p>
+        <div class="suggestions">
+          <div class="suggestion-card" data-q="شن الامور يا صحبي؟">💬 شن الامور يا صحبي؟</div>
+          <div class="suggestion-card" data-q="شن الوجبة الشعبية الأولى في ليبيا؟">🍲 الوجبة الشعبية</div>
+          <div class="suggestion-card" data-q="نبي نصيحة لتنظيم الوقت في الخدمة">💡 نصيحة تنظيم الوقت</div>
+          <div class="suggestion-card" data-q="كيف حال التريس اليوم؟">🤝 كيف حال التريس</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="inputWrap">
+    <div style="width:100%; max-width:760px;">
+      <div id="inputBox">
+        <textarea id="userInput" placeholder="اكتب رسالتك هنا..." rows="1"></textarea>
+        <button id="sendBtn">➤</button>
+      </div>
+      <div class="hint">مساعد تقنية ليبية الذكي — جميع محادثاتك محفوظة في حسابك الشخصي.</div>
+    </div>
+  </div>
+</main>
+
+<script>
+const TOKEN_KEY = 'libya_tech_jwt_token';
+const USER_KEY = 'libya_tech_user_info';
+
+let authToken = localStorage.getItem(TOKEN_KEY);
+let currentUser = JSON.parse(localStorage.getItem(USER_KEY) || 'null');
+
+let conversations = [];
+let activeConvId = null;
+
+const authModal = document.getElementById('authModal');
+const tabLogin = document.getElementById('tabLogin');
+const tabRegister = document.getElementById('tabRegister');
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const authError = document.getElementById('authError');
+
+const userNameDisplay = document.getElementById('userNameDisplay');
+const authBtn = document.getElementById('authBtn');
+const convList = document.getElementById('convList');
+const chatInner = document.getElementById('chatInner');
+const emptyState = document.getElementById('emptyState');
+const userInput = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const topbarTitle = document.getElementById('topbarTitle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+
+const btnEmailToggle = document.getElementById('btnEmailToggle');
+const emailFormWrap = document.getElementById('emailFormWrap');
+const btnGoogle = document.getElementById('btnGoogle');
+const btnFacebook = document.getElementById('btnFacebook');
+
+btnEmailToggle.addEventListener('click', () => {
+  emailFormWrap.style.display = emailFormWrap.style.display === 'none' ? 'block' : 'none';
+});
+
+btnGoogle.addEventListener('click', async () => {
+  if (!window.firebaseGoogleSignIn) {
+    showAuthError('تعذر تحميل خدمة Google، حاول تحدّث الصفحة');
+    return;
+  }
+  try {
+    const gUser = await window.firebaseGoogleSignIn();
+    await quickSocialLogin(gUser.name, gUser.email);
+  } catch (err) {
+    console.error(err);
+    if (err.code !== 'auth/popup-closed-by-user') {
+      showAuthError('تعذر تسجيل الدخول بحساب Google');
+    }
+  }
+});
+
+btnFacebook.addEventListener('click', () => quickSocialLogin('مستخدم فيسبوك', 'fb_user'));
+
+async function quickSocialLogin(name, username) {
+  try {
+    let res = await fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password: 'social_pass_2026' })
+    });
+    let data = await res.json();
+    if (data.error) {
+      res = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, username, password: 'social_pass_2026' })
+      });
+      data = await res.json();
+    }
+    if (data.token) {
+      setAuthSession(data.token, data.user);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// --- Auth Tabs & UI ---
+
+tabLogin.addEventListener('click', () => {
+  tabLogin.classList.add('active');
+  tabRegister.classList.remove('active');
+  loginForm.style.display = 'flex';
+  registerForm.style.display = 'none';
+  hideAuthError();
+});
+
+tabRegister.addEventListener('click', () => {
+  tabRegister.classList.add('active');
+  tabLogin.classList.remove('active');
+  registerForm.style.display = 'flex';
+  loginForm.style.display = 'none';
+  hideAuthError();
+});
+
+function showAuthError(msg) {
+  authError.textContent = msg;
+  authError.style.display = 'block';
+}
+
+function hideAuthError() {
+  authError.style.display = 'none';
+}
+
+// --- Auth API Calls ---
+
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideAuthError();
+  const username = document.getElementById('loginUsername').value;
+  const password = document.getElementById('loginPassword').value;
+
+  try {
+    const res = await fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (data.error) {
+      showAuthError(data.error);
+    } else {
+      setAuthSession(data.token, data.user);
+    }
+  } catch (err) {
+    showAuthError('تعذر الاتصال بالخادم');
+  }
+});
+
+registerForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideAuthError();
+  const name = document.getElementById('regName').value;
+  const username = document.getElementById('regUsername').value;
+  const password = document.getElementById('regPassword').value;
+
+  try {
+    const res = await fetch('/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, username, password })
+    });
+    const data = await res.json();
+    if (data.error) {
+      showAuthError(data.error);
+    } else {
+      setAuthSession(data.token, data.user);
+    }
+  } catch (err) {
+    showAuthError('تعذر الاتصال بالخادم');
+  }
+});
+
+function setAuthSession(token, user) {
+  authToken = token;
+  currentUser = user;
+  localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
+  authModal.classList.remove('active');
+  updateUserUI();
+  loadConversations();
+}
+
+authBtn.addEventListener('click', () => {
+  if (currentUser) {
+    // Logout
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+    authToken = null;
+    currentUser = null;
+    conversations = [];
+    activeConvId = null;
+    renderSidebar();
+    renderChat();
+    updateUserUI();
+    authModal.classList.add('active');
+  } else {
+    // Open auth modal
+    authModal.classList.add('active');
+  }
+});
+
+function updateUserUI() {
+  if (currentUser) {
+    userNameDisplay.textContent = `مرحباً، ${currentUser.name}`;
+    authBtn.textContent = 'خروج 🚪';
+    authBtn.style.background = 'transparent';
+    authBtn.style.border = '1px solid var(--border)';
+    authBtn.style.color = 'var(--text-secondary)';
+  } else {
+    userNameDisplay.textContent = '';
+    authBtn.textContent = 'دخول / تسجيل 🔑';
+    authBtn.style.background = 'var(--sand)';
+    authBtn.style.border = 'none';
+    authBtn.style.color = 'var(--bg-void)';
+  }
+}
+
+// --- Conversations & Messages API ---
+
+async function fetchWithAuth(url, options = {}) {
+  options.headers = options.headers || {};
+  options.headers['Authorization'] = `Bearer ${authToken}`;
+  const res = await fetch(url, options);
+  if (res.status === 401) {
+    // Unauthorized -> show auth modal
+    authModal.classList.add('active');
+    throw new Error('Unauthorized');
+  }
+  return res;
+}
+
+async function checkSession() {
+  if (!authToken || authToken === 'null' || authToken === 'undefined') {
+    authModal.classList.add('active');
+    updateUserUI();
+    return;
+  }
+  try {
+    const res = await fetchWithAuth('/me');
+    const data = await res.json();
+    if (data.user) {
+      currentUser = data.user;
+      authModal.classList.remove('active');
+      updateUserUI();
+      loadConversations();
+    } else {
+      authModal.classList.add('active');
+      updateUserUI();
+    }
+  } catch (err) {
+    authModal.classList.add('active');
+    updateUserUI();
+  }
+}
+
+async function loadConversations() {
+  try {
+    const res = await fetchWithAuth('/conversations');
+    const data = await res.json();
+    conversations = data.conversations || [];
+    renderSidebar();
+    if (conversations.length > 0 && !activeConvId) {
+      activeConvId = conversations[0].id;
+    }
+    renderChat();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function createNewConversation() {
+  try {
+    const res = await fetchWithAuth('/conversations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'محادثة جديدة' })
+    });
+    const data = await res.json();
+    activeConvId = data.conversation.id;
+    await loadConversations();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function deleteConversation(id, e) {
+  e.stopPropagation();
+  try {
+    await fetchWithAuth(`/conversations/${id}`, { method: 'DELETE' });
+    if (activeConvId === id) activeConvId = null;
+    await loadConversations();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function renderSidebar() {
+  convList.innerHTML = '';
+  conversations.forEach(conv => {
+    const item = document.createElement('div');
+    item.className = 'conv-item' + (conv.id === activeConvId ? ' active' : '');
+    item.innerHTML = `<span class="conv-title">${escapeHtml(conv.title)}</span><button class="conv-delete">✕</button>`;
+    item.addEventListener('click', () => {
+      activeConvId = conv.id;
+      renderSidebar();
+      renderChat();
+      closeSidebarMobile();
+    });
+    item.querySelector('.conv-delete').addEventListener('click', (e) => deleteConversation(conv.id, e));
+    convList.appendChild(item);
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+async function renderChat() {
+  chatInner.innerHTML = '';
+  if (!activeConvId) {
+    chatInner.appendChild(emptyState);
+    topbarTitle.textContent = 'محادثة جديدة';
+    return;
+  }
+
+  const currentConv = conversations.find(c => c.id === activeConvId);
+  topbarTitle.textContent = currentConv ? currentConv.title : 'محادثة جديدة';
+
+  try {
+    const res = await fetchWithAuth(`/conversations/${activeConvId}/messages`);
+    const data = await res.json();
+    const msgs = data.messages || [];
+    if (msgs.length === 0) {
+      chatInner.appendChild(emptyState);
+    } else {
+      msgs.forEach(msg => addMessageEl(msg.role, msg.content));
+    }
+    scrollToBottom();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function addMessageEl(role, content) {
+  const row = document.createElement('div');
+  row.className = 'row ' + (role === 'user' ? 'user' : 'bot');
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar ' + (role === 'user' ? 'user' : 'bot');
+  avatar.textContent = role === 'user' ? (currentUser ? currentUser.name[0] : 'أ') : 'ل';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = content;
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+  chatInner.appendChild(row);
+  return bubble;
+}
+
+function scrollToBottom() {
+  const scroll = document.getElementById('chatScroll');
+  scroll.scrollTop = scroll.scrollHeight;
+}
+
+function autoResize() {
+  userInput.style.height = 'auto';
+  userInput.style.height = Math.min(userInput.scrollHeight, 160) + 'px';
+}
+
+async function sendMessage(text) {
+  text = (text || userInput.value).trim();
+  if (!text) return;
+
+  if (emptyState.parentNode === chatInner) {
+    chatInner.removeChild(emptyState);
+  }
+
+  addMessageEl('user', text);
+  scrollToBottom();
+
+  userInput.value = '';
+  autoResize();
+  sendBtn.disabled = true;
+
+  const typingRow = document.createElement('div');
+  typingRow.className = 'row bot';
+  typingRow.innerHTML = `<div class="avatar bot">ل</div><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  chatInner.appendChild(typingRow);
+  scrollToBottom();
+
+  try {
+    const res = await fetchWithAuth('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, conversation_id: activeConvId })
+    });
+    const data = await res.json();
+    typingRow.remove();
+
+    if (data.reply) {
+      addMessageEl('assistant', data.reply);
+      activeConvId = data.conversation_id;
+      await loadConversations();
+    } else if (data.error) {
+      addMessageEl('assistant', data.error);
+    }
+  } catch (err) {
+    typingRow.remove();
+    addMessageEl('assistant', 'تعذر الاتصال بالخادم. حاول مجدداً.');
+  }
+
+  sendBtn.disabled = false;
+  userInput.focus();
+  scrollToBottom();
+}
+
+sendBtn.addEventListener('click', () => sendMessage());
+userInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+userInput.addEventListener('input', autoResize);
+
+document.getElementById('newChatBtn').addEventListener('click', () => {
+  activeConvId = null;
+  createNewConversation();
+  closeSidebarMobile();
+});
+
+document.querySelectorAll('.suggestion-card').forEach(card => {
+  card.addEventListener('click', () => sendMessage(card.dataset.q));
+});
+
+document.getElementById('toggleSidebar').addEventListener('click', () => {
+  sidebar.classList.toggle('collapsed');
+  overlay.classList.toggle('show', !sidebar.classList.contains('collapsed') && window.innerWidth <= 720);
+});
+overlay.addEventListener('click', closeSidebarMobile);
+
+function closeSidebarMobile() {
+  if (window.innerWidth <= 720) {
+    sidebar.classList.add('collapsed');
+    overlay.classList.remove('show');
+  }
+}
+
+// Start
+checkSession();
+</script>
+
+</body>
+</html>
