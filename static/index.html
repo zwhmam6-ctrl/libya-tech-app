@@ -444,6 +444,53 @@
   #sendBtn:hover { opacity: 0.9; transform: scale(1.04); }
   #sendBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
+  #micBtn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  #micBtn:hover {
+    background: var(--bg-hover);
+    border-color: var(--sand-dim);
+  }
+  #micBtn.recording {
+    background: var(--danger);
+    color: #ffffff;
+    border-color: var(--danger);
+    animation: pulse 1s infinite alternate;
+  }
+
+  .speech-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .speech-btn:hover {
+    background: var(--sand);
+    color: var(--bg-void);
+    border-color: var(--sand);
+  }
+
   /* AI Mode Switcher Bar */
   #modeBar {
     display: flex;
@@ -859,6 +906,7 @@
     <span id="topbarTitle">محادثة جديدة</span>
 
     <div id="userBadge">
+      <button id="lowDataBtn" title="تفعيل وضع توفير النت للشبكات الضعيفة" style="background: var(--bg-panel); border: 1px solid var(--border); color: var(--text-secondary); padding: 6px 12px; border-radius: 9px; font-weight: 700; font-size: 12px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 4px;">⚡ توفير النت: إيقاف</button>
       <span id="userNameDisplay"></span>
       <button id="authBtn" style="background: var(--sand); border: none; color: var(--bg-void); padding: 7px 14px; border-radius: 9px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit;">دخول / تسجيل 🔑</button>
     </div>
@@ -869,11 +917,11 @@
       <div id="emptyState">
         <div class="glyph">🇱🇾</div>
         <h1>أهلاً بيك يا غالي!</h1>
-        <p>أني صاحبك الليبي الذكي — نبرمج الأكواد، نصمم ونولد الصور، ونساعدك في الكتابة والهدرزة!</p>
+        <p>أني صاحبك الليبي الذكي — نبرمج الأكواد، نصمم الصور، نساعدك في المعاملات والأسواق الليبية، ونسمعك بصوتي!</p>
         <div class="suggestions">
+          <div class="suggestion-card" data-q="شن الأوراق المطلوبة لاستخراج السجل التجاري في ليبيا؟" data-mode="libya_services">💵 الأوراق المطلوبة للسجل التجاري</div>
           <div class="suggestion-card" data-q="اكتبلي كود Python لحساب فرق الأيام بين تاريخين" data-mode="code">💻 كود Python لحساب التواريخ</div>
           <div class="suggestion-card" data-q="صمملي صورة لقلعة طرابلس التاريخية بالذكاء الاصطناعي" data-mode="image">🎨 تصميم صورة لقلعة طرابلس</div>
-          <div class="suggestion-card" data-q="صيغلي رسالة إيميل رسمية واحترافية لطلب إجازة" data-mode="writer">📝 كتابة إيميل رسمي</div>
           <div class="suggestion-card" data-q="شن الامور يا صحبي؟" data-mode="general">💬 شن الامور يا صحبي؟</div>
         </div>
       </div>
@@ -885,16 +933,18 @@
       <!-- شريط الأنماط الذكية -->
       <div id="modeBar">
         <button class="mode-chip active" data-mode="general">🇱🇾 هدرزة عامة</button>
+        <button class="mode-chip" data-mode="libya_services">💵 خدمات وأسواق ليبيا</button>
         <button class="mode-chip" data-mode="code">💻 خبير البرمجة</button>
         <button class="mode-chip" data-mode="image">🎨 مصمم الصور</button>
         <button class="mode-chip" data-mode="writer">📝 كاتب المحتوى</button>
       </div>
 
       <div id="inputBox">
-        <textarea id="userInput" placeholder="اكتب رسالتك، كودك، أو وصف الصورة المطلوب..." rows="1"></textarea>
+        <button id="micBtn" title="التحدث بالميكروفون (صوتي)">🎙️</button>
+        <textarea id="userInput" placeholder="اكتب رسالتك، تحدث بالميكروفون، أو اطلب كود/صورة..." rows="1"></textarea>
         <button id="sendBtn">➤</button>
       </div>
-      <div class="hint">مساعد تقنية ليبية الذكي v2 — يدعم البرمجة والتكويد، تصميم الصور، وكتابة المحتوى.</div>
+      <div class="hint">مساعد تقنية ليبية الذكي v2.5 — يدعم التحدث الصوتي، خدمات ليبيا، البرمجة، وتوليد الصور.</div>
     </div>
   </div>
 </main>
@@ -1213,6 +1263,17 @@ async function renderChat() {
 }
 
 let activeMode = 'general';
+let isLowData = false;
+
+const lowDataBtn = document.getElementById('lowDataBtn');
+if (lowDataBtn) {
+  lowDataBtn.addEventListener('click', () => {
+    isLowData = !isLowData;
+    lowDataBtn.innerHTML = isLowData ? '⚡ توفير النت: مفعل ✓' : '⚡ توفير النت: إيقاف';
+    lowDataBtn.style.borderColor = isLowData ? 'var(--sand)' : 'var(--border)';
+    lowDataBtn.style.color = isLowData ? 'var(--sand)' : 'var(--text-secondary)';
+  });
+}
 
 document.querySelectorAll('.mode-chip').forEach(chip => {
   chip.addEventListener('click', () => {
@@ -1226,11 +1287,89 @@ document.querySelectorAll('.mode-chip').forEach(chip => {
       userInput.placeholder = "صف الصورة التي تريد تصميمها: صمملي صورة لطرابلس، ارسم سيارة رالي...";
     } else if (activeMode === 'writer') {
       userInput.placeholder = "طلب كتابة محتوى: اكتب مقالاً، صيغ إيميل رسمي، ترجم نصاً...";
+    } else if (activeMode === 'libya_services') {
+      userInput.placeholder = "استفسار المعاملات والأسواق: الأوراق المطلوبة للجوازات، السجل التجاري، حسابات العملة...";
     } else {
-      userInput.placeholder = "اكتب رسالتك هنا... (أهلاً بيك يا غالي!)";
+      userInput.placeholder = "اكتب رسالتك، تحدث بالميكروفون، أو اطلب كود/صورة...";
     }
   });
 });
+
+// Voice Input (Speech-to-Text)
+const micBtn = document.getElementById('micBtn');
+let recognition = null;
+let isRecording = false;
+
+if (micBtn && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'ar-LY';
+
+  recognition.onstart = () => {
+    isRecording = true;
+    micBtn.classList.add('recording');
+    micBtn.title = "جاري التسميع... تحدث الآن 🎙️";
+  };
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    userInput.value += (userInput.value ? ' ' : '') + transcript;
+    autoResize();
+  };
+
+  recognition.onerror = () => {
+    isRecording = false;
+    micBtn.classList.remove('recording');
+  };
+
+  recognition.onend = () => {
+    isRecording = false;
+    micBtn.classList.remove('recording');
+  };
+
+  micBtn.addEventListener('click', () => {
+    if (isRecording) {
+      recognition.stop();
+    } else {
+      try {
+        recognition.start();
+      } catch(e) {
+        console.error(e);
+      }
+    }
+  });
+} else if (micBtn) {
+  micBtn.style.display = 'none';
+}
+
+// Text-to-Speech (Bot Voice)
+function speakText(text, btn) {
+  if (!('speechSynthesis' in window)) {
+    alert('متصفحك لا يدعم خاصية نطق الصوت.');
+    return;
+  }
+
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    if (btn) btn.innerHTML = 'استمع للرد 🔊';
+    return;
+  }
+
+  const cleanText = text.replace(/```[\s\S]*?```/g, 'كود برمجي').replace(/[#*`_!\[\]()]/g, ' ');
+  const utterance = new SpeechSynthesisUtterance(cleanText);
+  utterance.lang = 'ar-SA';
+  utterance.rate = 1.0;
+
+  if (btn) {
+    btn.innerHTML = 'إيقاف الصوت 🛑';
+    utterance.onend = () => { btn.innerHTML = 'استمع للرد 🔊'; };
+    utterance.onerror = () => { btn.innerHTML = 'استمع للرد 🔊'; };
+  }
+
+  window.speechSynthesis.speak(utterance);
+}
 
 function formatAssistantMessage(content, bubble) {
   if (typeof marked !== 'undefined') {
@@ -1251,7 +1390,7 @@ function formatAssistantMessage(content, bubble) {
       return;
     }
 
-    // Enhance code blocks with copy buttons and language label
+    // Enhance code blocks with copy buttons
     bubble.querySelectorAll('pre').forEach(pre => {
       const codeEl = pre.querySelector('code');
       const langClass = codeEl ? Array.from(codeEl.classList).find(c => c.startsWith('language-')) : '';
@@ -1282,11 +1421,13 @@ function formatAssistantMessage(content, bubble) {
       wrapper.appendChild(pre);
     });
 
-    // Enhance images with download buttons
+    // Enhance images with download buttons (skip if low data mode is active)
     bubble.querySelectorAll('img').forEach(img => {
+      if (isLowData) {
+        img.style.display = 'none';
+        return;
+      }
       const src = img.src;
-      const alt = img.alt || 'صورة مولدة بالذكاء الاصطناعي';
-
       const wrap = document.createElement('div');
       wrap.className = 'ai-image-wrap';
 
@@ -1339,6 +1480,13 @@ function addMessageEl(role, content) {
     bubble.textContent = content;
   } else {
     formatAssistantMessage(content, bubble);
+
+    // Add Text-to-Speech button
+    const speechBtn = document.createElement('button');
+    speechBtn.className = 'speech-btn';
+    speechBtn.innerHTML = 'استمع للرد 🔊';
+    speechBtn.addEventListener('click', () => speakText(content, speechBtn));
+    bubble.appendChild(speechBtn);
   }
 
   row.appendChild(avatar);
