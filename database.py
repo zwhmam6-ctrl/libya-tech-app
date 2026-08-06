@@ -13,33 +13,16 @@ def init_db():
     with get_db() as conn:
         cursor = conn.cursor()
         
-        # 1. Users table (with google_uid support)
+        # 1. Users table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 username TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL DEFAULT '',
-                google_uid TEXT UNIQUE,
-                email TEXT,
-                avatar TEXT,
+                password_hash TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        
-        # Add google_uid column if it doesn't exist (migration)
-        try:
-            cursor.execute("ALTER TABLE users ADD COLUMN google_uid TEXT UNIQUE")
-        except Exception:
-            pass
-        try:
-            cursor.execute("ALTER TABLE users ADD COLUMN email TEXT")
-        except Exception:
-            pass
-        try:
-            cursor.execute("ALTER TABLE users ADD COLUMN avatar TEXT")
-        except Exception:
-            pass
         
         # 2. Conversations table
         cursor.execute("""
@@ -82,49 +65,6 @@ def create_user(name: str, username: str, password_hash: str) -> Optional[Dict[s
     except sqlite3.IntegrityError:
         return None
 
-def create_or_get_google_user(google_uid: str, name: str, email: str, avatar: str = "") -> Optional[Dict[str, Any]]:
-    """Create or find user by Google UID."""
-    with get_db() as conn:
-        cursor = conn.cursor()
-        
-        # Check if user already exists by google_uid
-        cursor.execute("SELECT id, name, username, email, avatar FROM users WHERE google_uid = ?", (google_uid,))
-        row = cursor.fetchone()
-        if row:
-            return dict(row)
-        
-        # Check if user exists by email
-        cursor.execute("SELECT id, name, username, email, avatar FROM users WHERE email = ?", (email,))
-        row = cursor.fetchone()
-        if row:
-            # Link Google UID to existing account
-            cursor.execute("UPDATE users SET google_uid = ?, avatar = ? WHERE email = ?", (google_uid, avatar, email))
-            conn.commit()
-            return dict(row)
-        
-        # Create new Google user
-        # Generate a unique username from email
-        base_username = email.split("@")[0].lower().replace(".", "_")[:20]
-        username = base_username
-        counter = 1
-        while True:
-            cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
-            if not cursor.fetchone():
-                break
-            username = f"{base_username}{counter}"
-            counter += 1
-        
-        try:
-            cursor.execute(
-                "INSERT INTO users (name, username, password_hash, google_uid, email, avatar) VALUES (?, ?, '', ?, ?, ?)",
-                (name, username, google_uid, email, avatar)
-            )
-            user_id = cursor.lastrowid
-            conn.commit()
-            return {"id": user_id, "name": name, "username": username, "email": email, "avatar": avatar}
-        except sqlite3.IntegrityError:
-            return None
-
 def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
     with get_db() as conn:
         cursor = conn.cursor()
@@ -137,7 +77,7 @@ def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
 def get_user_by_id(user_id: int) -> Optional[Dict[str, Any]]:
     with get_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT id, name, username, email, avatar, created_at FROM users WHERE id = ?", (user_id,))
+        cursor.execute("SELECT id, name, username, created_at FROM users WHERE id = ?", (user_id,))
         row = cursor.fetchone()
         if row:
             return dict(row)
@@ -195,6 +135,7 @@ def add_message(conv_id: str, role: str, content: str):
 def get_conversation_messages(conv_id: str, user_id: int) -> List[Dict[str, Any]]:
     with get_db() as conn:
         cursor = conn.cursor()
+        # Ensure conversation belongs to user
         cursor.execute("SELECT id FROM conversations WHERE id = ? AND user_id = ?", (conv_id, user_id))
         if not cursor.fetchone():
             return []

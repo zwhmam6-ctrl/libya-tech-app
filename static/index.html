@@ -6,38 +6,10 @@
 <title>تقنية ليبية — مساعدك الذكي 🇱🇾</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-<!-- Firebase: تسجيل الدخول بحساب Google -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDzUcXscbjEdD4U-Pe9XTMHmceArQSxmOA",
-    authDomain: "hmai-f6225.firebaseapp.com",
-    projectId: "hmai-f6225",
-    storageBucket: "hmai-f6225.firebasestorage.app",
-    messagingSenderId: "232841600909",
-    appId: "1:232841600909:web:568444dbfff6aa550be7c4",
-    measurementId: "G-YJ19F15WWL"
-  };
-
-  const fbApp = initializeApp(firebaseConfig);
-  const auth = getAuth(fbApp);
-  const googleProvider = new GoogleAuthProvider();
-
-  window.firebaseGoogleSignIn = async function () {
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-    return {
-      name: user.displayName || 'مستخدم Google',
-      email: user.email,
-      uid: user.uid,
-      photo: user.photoURL
-    };
-  };
-</script>
-
+<!-- Markdown & Syntax Highlighting -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <style>
   :root {
     --bg-void: #0b0e14;
@@ -472,6 +444,143 @@
   #sendBtn:hover { opacity: 0.9; transform: scale(1.04); }
   #sendBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
+  /* AI Mode Switcher Bar */
+  #modeBar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  #modeBar::-webkit-scrollbar { display: none; }
+  .mode-chip {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 6px 13px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-family: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+  .mode-chip:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+  }
+  .mode-chip.active {
+    background: linear-gradient(135deg, rgba(212, 160, 84, 0.2), rgba(58, 145, 136, 0.2));
+    border-color: var(--sand);
+    color: var(--sand);
+    box-shadow: 0 0 12px rgba(212, 160, 84, 0.15);
+  }
+
+  /* Code Blocks & Markdown Formatting */
+  .bubble p { margin-bottom: 8px; }
+  .bubble p:last-child { margin-bottom: 0; }
+  .bubble ul, .bubble ol { margin: 8px 18px; }
+  .bubble table { border-collapse: collapse; margin: 10px 0; width: 100%; font-size: 13.5px; }
+  .bubble th, .bubble td { border: 1px solid var(--border); padding: 8px 12px; text-align: right; }
+  .bubble th { background: var(--bg-elevated); color: var(--sand); }
+  
+  .code-block-wrapper {
+    margin: 12px 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #1e1e1e;
+    direction: ltr; /* Code remains Left-To-Right */
+    text-align: left;
+  }
+  .code-header {
+    background: #252830;
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .code-header span.lang { font-weight: 700; color: var(--sand); text-transform: uppercase; }
+  .copy-code-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #eef0f4;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'Tajawal', sans-serif;
+    transition: background 0.2s, color 0.2s;
+  }
+  .copy-code-btn:hover {
+    background: var(--sand);
+    color: var(--bg-void);
+    border-color: var(--sand);
+  }
+  .code-block-wrapper pre {
+    margin: 0;
+    padding: 12px 16px;
+    overflow-x: auto;
+  }
+  .code-block-wrapper code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  /* AI Image Card styling */
+  .ai-image-wrap {
+    margin: 12px 0;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .ai-image-wrap img {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
+  .ai-image-wrap img:hover { transform: scale(1.015); }
+  .ai-img-actions {
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border);
+  }
+  .ai-img-actions span { font-size: 12px; color: var(--text-secondary); }
+  .img-download-btn {
+    background: var(--sand);
+    border: none;
+    color: var(--bg-void);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Tajawal', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.15s, opacity 0.15s;
+  }
+  .img-download-btn:hover { transform: scale(1.03); opacity: 0.95; }
+
   .hint {
     font-size: 11px;
     color: var(--text-faint);
@@ -760,12 +869,12 @@
       <div id="emptyState">
         <div class="glyph">🇱🇾</div>
         <h1>أهلاً بيك يا غالي!</h1>
-        <p>أني صاحبك الليبي، تفضل هدرز معايا في أي موضوع أو اسألني على أي حاجة تبيها!</p>
+        <p>أني صاحبك الليبي الذكي — نبرمج الأكواد، نصمم ونولد الصور، ونساعدك في الكتابة والهدرزة!</p>
         <div class="suggestions">
-          <div class="suggestion-card" data-q="شن الامور يا صحبي؟">💬 شن الامور يا صحبي؟</div>
-          <div class="suggestion-card" data-q="شن الوجبة الشعبية الأولى في ليبيا؟">🍲 الوجبة الشعبية</div>
-          <div class="suggestion-card" data-q="نبي نصيحة لتنظيم الوقت في الخدمة">💡 نصيحة تنظيم الوقت</div>
-          <div class="suggestion-card" data-q="كيف حال التريس اليوم؟">🤝 كيف حال التريس</div>
+          <div class="suggestion-card" data-q="اكتبلي كود Python لحساب فرق الأيام بين تاريخين" data-mode="code">💻 كود Python لحساب التواريخ</div>
+          <div class="suggestion-card" data-q="صمملي صورة لقلعة طرابلس التاريخية بالذكاء الاصطناعي" data-mode="image">🎨 تصميم صورة لقلعة طرابلس</div>
+          <div class="suggestion-card" data-q="صيغلي رسالة إيميل رسمية واحترافية لطلب إجازة" data-mode="writer">📝 كتابة إيميل رسمي</div>
+          <div class="suggestion-card" data-q="شن الامور يا صحبي؟" data-mode="general">💬 شن الامور يا صحبي؟</div>
         </div>
       </div>
     </div>
@@ -773,11 +882,19 @@
 
   <div id="inputWrap">
     <div style="width:100%; max-width:760px;">
+      <!-- شريط الأنماط الذكية -->
+      <div id="modeBar">
+        <button class="mode-chip active" data-mode="general">🇱🇾 هدرزة عامة</button>
+        <button class="mode-chip" data-mode="code">💻 خبير البرمجة</button>
+        <button class="mode-chip" data-mode="image">🎨 مصمم الصور</button>
+        <button class="mode-chip" data-mode="writer">📝 كاتب المحتوى</button>
+      </div>
+
       <div id="inputBox">
-        <textarea id="userInput" placeholder="اكتب رسالتك هنا..." rows="1"></textarea>
+        <textarea id="userInput" placeholder="اكتب رسالتك، كودك، أو وصف الصورة المطلوب..." rows="1"></textarea>
         <button id="sendBtn">➤</button>
       </div>
-      <div class="hint">مساعد تقنية ليبية الذكي — جميع محادثاتك محفوظة في حسابك الشخصي.</div>
+      <div class="hint">مساعد تقنية ليبية الذكي v2 — يدعم البرمجة والتكويد، تصميم الصور، وكتابة المحتوى.</div>
     </div>
   </div>
 </main>
@@ -819,22 +936,7 @@ btnEmailToggle.addEventListener('click', () => {
   emailFormWrap.style.display = emailFormWrap.style.display === 'none' ? 'block' : 'none';
 });
 
-btnGoogle.addEventListener('click', async () => {
-  if (!window.firebaseGoogleSignIn) {
-    showAuthError('تعذر تحميل خدمة Google، حاول تحدّث الصفحة');
-    return;
-  }
-  try {
-    const gUser = await window.firebaseGoogleSignIn();
-    await quickSocialLogin(gUser.name, gUser.email);
-  } catch (err) {
-    console.error(err);
-    if (err.code !== 'auth/popup-closed-by-user') {
-      showAuthError('تعذر تسجيل الدخول بحساب Google');
-    }
-  }
-});
-
+btnGoogle.addEventListener('click', () => quickSocialLogin('مستخدم Google', 'google_user'));
 btnFacebook.addEventListener('click', () => quickSocialLogin('مستخدم فيسبوك', 'fb_user'));
 
 async function quickSocialLogin(name, username) {
@@ -1110,6 +1212,120 @@ async function renderChat() {
   }
 }
 
+let activeMode = 'general';
+
+document.querySelectorAll('.mode-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.mode-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeMode = chip.dataset.mode;
+    
+    if (activeMode === 'code') {
+      userInput.placeholder = "اسألني في البرمجة: اكتبلي كود، صلح لي الخطأ، اشرح لي هذه الدالة...";
+    } else if (activeMode === 'image') {
+      userInput.placeholder = "صف الصورة التي تريد تصميمها: صمملي صورة لطرابلس، ارسم سيارة رالي...";
+    } else if (activeMode === 'writer') {
+      userInput.placeholder = "طلب كتابة محتوى: اكتب مقالاً، صيغ إيميل رسمي، ترجم نصاً...";
+    } else {
+      userInput.placeholder = "اكتب رسالتك هنا... (أهلاً بيك يا غالي!)";
+    }
+  });
+});
+
+function formatAssistantMessage(content, bubble) {
+  if (typeof marked !== 'undefined') {
+    try {
+      marked.setOptions({
+        highlight: function(code, lang) {
+          if (typeof hljs !== 'undefined') {
+            const validLanguage = hljs.getLanguage(lang) ? lang : 'plaintext';
+            return hljs.highlight(code, { language: validLanguage }).value;
+          }
+          return code;
+        },
+        langPrefix: 'hljs language-'
+      });
+      bubble.innerHTML = marked.parse(content);
+    } catch(e) {
+      bubble.textContent = content;
+      return;
+    }
+
+    // Enhance code blocks with copy buttons and language label
+    bubble.querySelectorAll('pre').forEach(pre => {
+      const codeEl = pre.querySelector('code');
+      const langClass = codeEl ? Array.from(codeEl.classList).find(c => c.startsWith('language-')) : '';
+      const lang = langClass ? langClass.replace('language-', '') : 'code';
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'code-block-wrapper';
+
+      const header = document.createElement('div');
+      header.className = 'code-header';
+      header.innerHTML = `<span class="lang">${escapeHtml(lang)}</span><button class="copy-code-btn">نسخ الكود 📋</button>`;
+
+      const copyBtn = header.querySelector('.copy-code-btn');
+      copyBtn.addEventListener('click', () => {
+        const rawCode = codeEl ? codeEl.innerText : pre.innerText;
+        navigator.clipboard.writeText(rawCode).then(() => {
+          copyBtn.textContent = 'تم النسخ! ✓';
+          copyBtn.style.background = '#3a9188';
+          setTimeout(() => {
+            copyBtn.textContent = 'نسخ الكود 📋';
+            copyBtn.style.background = '';
+          }, 2000);
+        });
+      });
+
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(header);
+      wrapper.appendChild(pre);
+    });
+
+    // Enhance images with download buttons
+    bubble.querySelectorAll('img').forEach(img => {
+      const src = img.src;
+      const alt = img.alt || 'صورة مولدة بالذكاء الاصطناعي';
+
+      const wrap = document.createElement('div');
+      wrap.className = 'ai-image-wrap';
+
+      const actions = document.createElement('div');
+      actions.className = 'ai-img-actions';
+      actions.innerHTML = `<span>🎨 صورة ذكاء اصطناعي</span><button class="img-download-btn">تحميل الصورة 📥</button>`;
+
+      const downloadBtn = actions.querySelector('.img-download-btn');
+      downloadBtn.addEventListener('click', async () => {
+        try {
+          downloadBtn.textContent = 'جاري التحميل... ⏳';
+          const response = await fetch(src);
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = `libya_ai_image_${Date.now()}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(blobUrl);
+          downloadBtn.textContent = 'تم التحميل! ✓';
+          setTimeout(() => downloadBtn.textContent = 'تحميل الصورة 📥', 2500);
+        } catch (e) {
+          window.open(src, '_blank');
+          downloadBtn.textContent = 'تحميل الصورة 📥';
+        }
+      });
+
+      img.parentNode.insertBefore(wrap, img);
+      wrap.appendChild(img);
+      wrap.appendChild(actions);
+    });
+
+  } else {
+    bubble.textContent = content;
+  }
+}
+
 function addMessageEl(role, content) {
   const row = document.createElement('div');
   row.className = 'row ' + (role === 'user' ? 'user' : 'bot');
@@ -1118,7 +1334,13 @@ function addMessageEl(role, content) {
   avatar.textContent = role === 'user' ? (currentUser ? currentUser.name[0] : 'أ') : 'ل';
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
-  bubble.textContent = content;
+  
+  if (role === 'user') {
+    bubble.textContent = content;
+  } else {
+    formatAssistantMessage(content, bubble);
+  }
+
   row.appendChild(avatar);
   row.appendChild(bubble);
   chatInner.appendChild(row);
@@ -1135,9 +1357,11 @@ function autoResize() {
   userInput.style.height = Math.min(userInput.scrollHeight, 160) + 'px';
 }
 
-async function sendMessage(text) {
+async function sendMessage(text, modeOverride) {
   text = (text || userInput.value).trim();
   if (!text) return;
+
+  const modeToSend = modeOverride || activeMode;
 
   if (emptyState.parentNode === chatInner) {
     chatInner.removeChild(emptyState);
@@ -1160,7 +1384,7 @@ async function sendMessage(text) {
     const res = await fetchWithAuth('/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text, conversation_id: activeConvId })
+      body: JSON.stringify({ message: text, conversation_id: activeConvId, mode: modeToSend })
     });
     const data = await res.json();
     typingRow.remove();
@@ -1198,7 +1422,12 @@ document.getElementById('newChatBtn').addEventListener('click', () => {
 });
 
 document.querySelectorAll('.suggestion-card').forEach(card => {
-  card.addEventListener('click', () => sendMessage(card.dataset.q));
+  card.addEventListener('click', () => {
+    const qMode = card.dataset.mode || 'general';
+    const chip = document.querySelector(`.mode-chip[data-mode="${qMode}"]`);
+    if (chip) chip.click();
+    sendMessage(card.dataset.q, qMode);
+  });
 });
 
 document.getElementById('toggleSidebar').addEventListener('click', () => {
