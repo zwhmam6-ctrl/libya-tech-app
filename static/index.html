@@ -6,6 +6,38 @@
 <title>تقنية ليبية — مساعدك الذكي 🇱🇾</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Firebase: تسجيل الدخول بحساب Google -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDzUcXscbjEdD4U-Pe9XTMHmceArQSxmOA",
+    authDomain: "hmai-f6225.firebaseapp.com",
+    projectId: "hmai-f6225",
+    storageBucket: "hmai-f6225.firebasestorage.app",
+    messagingSenderId: "232841600909",
+    appId: "1:232841600909:web:568444dbfff6aa550be7c4",
+    measurementId: "G-YJ19F15WWL"
+  };
+
+  const fbApp = initializeApp(firebaseConfig);
+  const auth = getAuth(fbApp);
+  const googleProvider = new GoogleAuthProvider();
+
+  window.firebaseGoogleSignIn = async function () {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    return {
+      name: user.displayName || 'مستخدم Google',
+      email: user.email,
+      uid: user.uid,
+      photo: user.photoURL
+    };
+  };
+</script>
+
 <style>
   :root {
     --bg-void: #0b0e14;
@@ -787,7 +819,22 @@ btnEmailToggle.addEventListener('click', () => {
   emailFormWrap.style.display = emailFormWrap.style.display === 'none' ? 'block' : 'none';
 });
 
-btnGoogle.addEventListener('click', () => quickSocialLogin('مستخدم Google', 'google_user'));
+btnGoogle.addEventListener('click', async () => {
+  if (!window.firebaseGoogleSignIn) {
+    showAuthError('تعذر تحميل خدمة Google، حاول تحدّث الصفحة');
+    return;
+  }
+  try {
+    const gUser = await window.firebaseGoogleSignIn();
+    await quickSocialLogin(gUser.name, gUser.email);
+  } catch (err) {
+    console.error(err);
+    if (err.code !== 'auth/popup-closed-by-user') {
+      showAuthError('تعذر تسجيل الدخول بحساب Google');
+    }
+  }
+});
+
 btnFacebook.addEventListener('click', () => quickSocialLogin('مستخدم فيسبوك', 'fb_user'));
 
 async function quickSocialLogin(name, username) {

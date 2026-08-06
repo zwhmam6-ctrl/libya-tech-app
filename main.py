@@ -52,6 +52,12 @@ class ChatRequest(BaseModel):
     message: str
     conversation_id: Optional[str] = None
 
+class GoogleLoginRequest(BaseModel):
+    google_uid: str
+    name: str
+    email: str
+    avatar: Optional[str] = ""
+
 # --- Auth Helper Dependency ---
 
 def get_current_user(authorization: Optional[str] = Header(None)):
@@ -102,6 +108,34 @@ async def login(req: LoginRequest):
 @app.get("/me")
 async def get_me(user: dict = Depends(get_current_user)):
     return {"user": user}
+
+
+@app.post("/google-login")
+async def google_login(req: GoogleLoginRequest):
+    """تسجيل الدخول أو إنشاء حساب عبر Google Firebase"""
+    if not req.google_uid or not req.email:
+        return {"error": "بيانات Google غير مكتملة"}
+    
+    user = db.create_or_get_google_user(
+        google_uid=req.google_uid,
+        name=req.name or req.email.split("@")[0],
+        email=req.email,
+        avatar=req.avatar or ""
+    )
+    
+    if not user:
+        return {"error": "فشل تسجيل الدخول بحساب Google، حاول مجدداً"}
+    
+    token = auth.create_token(user["id"])
+    user_data = {
+        "id": user["id"],
+        "name": user["name"],
+        "username": user.get("username", ""),
+        "email": user.get("email", ""),
+        "avatar": user.get("avatar", "")
+    }
+    return {"token": token, "user": user_data}
+
 
 # --- Conversations Endpoints ---
 
