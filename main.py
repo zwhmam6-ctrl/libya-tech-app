@@ -104,6 +104,46 @@ def get_current_user(authorization: Optional[str] = Header(None)):
 
 # --- Auth Endpoints ---
 
+class GoogleLoginRequest(BaseModel):
+    credential: str
+    name: Optional[str] = None
+    email: Optional[str] = None
+
+
+@app.post("/google-login")
+async def google_login(req: GoogleLoginRequest):
+    import base64
+    import json
+
+    user_name = req.name or "مستخدم Google"
+    username_raw = req.email or "google_user"
+
+    if req.credential and req.credential.count(".") >= 2:
+        try:
+            parts = req.credential.split(".")
+            payload_b64 = parts[1] + "=" * (-len(parts[1]) % 4)
+            payload_json = base64.urlsafe_b64decode(payload_b64).decode("utf-8")
+            payload = json.loads(payload_json)
+            user_name = payload.get("name", user_name)
+            username_raw = payload.get("email", payload.get("sub", username_raw))
+        except Exception as e:
+            print("Google JWT decode error:", e)
+
+    username_clean = username_raw.split("@")[0].replace(".", "_")[:20]
+    if len(username_clean) < 3:
+        username_clean = "g_user_" + uuid.uuid4().hex[:6]
+
+    existing = db.get_user_by_username(username_clean)
+    if not existing:
+        pwd_hash = auth.hash_password(f"g_auth_{uuid.uuid4().hex}")
+        user = db.create_user(name=user_name, username=username_clean, password_hash=pwd_hash)
+    else:
+        user = existing
+
+    token = auth.create_token(user["id"])
+    return {"token": token, "user": {"id": user["id"], "name": user["name"], "username": user["username"]}}
+
+
 @app.post("/register")
 async def register(req: RegisterRequest):
     if len(req.username.strip()) < 3:
